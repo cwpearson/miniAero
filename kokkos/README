@@ -5,6 +5,8 @@ Sections:
 ---------
 I) Introduction
 II) Building
+II.a) With CMake (suggested)
+II.b) With Make
 III) Running
 IV) Testing
 
@@ -32,6 +34,19 @@ MiniAero has minimal dependencies. It directly depends on the
 Kokkos library. You can check this out from github:
 git clone https://github.com:kokkos/kokkos
 
+MiniAero can be built with CMake (suggested), or Makefiles.
+
+In all cases, miniAero.kokkos binary is produced.
+
+II.a) With CMake (suggested)
+
+MiniAero fetches Kokkos 4.3.00 as part of the CMake configure step.
+Options may be passed to the Kokkos build as normal,
+e.g. -DKokkos_ENABLE_OpenMP=ON
+
+MPI can be disabled with -DMINIAERO_ENABLE_MPI=OFF
+
+II.b) With Make
 MiniAero uses simple Makefiles and builds Kokkos as an 
 integrated library (i.e. you do not need to pre-install 
 Kokkos). 
