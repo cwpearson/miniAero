@@ -566,7 +566,7 @@ class StencilLimiter{
       Device().fence();
       Kokkos::deep_copy(shared_vars_host, shared_vars);
   
-      communicate_ghosted_cell_data(mesh_data_->sendCount, mesh_data_->recvCount, shared_vars_host.ptr_on_device(),ghosted_vars_host.ptr_on_device(), 5);
+      communicate_ghosted_cell_data(mesh_data_->sendCount, mesh_data_->recvCount, shared_vars_host.data(),ghosted_vars_host.data(), 5);
   
       Kokkos::deep_copy(ghosted_vars, ghosted_vars_host);
       insert_ghost_vector<Device, 5> insert_ghost_min(stencil_min_, mesh_data_->recv_local_ids, ghosted_vars);
@@ -579,7 +579,7 @@ class StencilLimiter{
       Device().fence();
       Kokkos::deep_copy(shared_vars_host, shared_vars);
   
-      communicate_ghosted_cell_data(mesh_data_->sendCount, mesh_data_->recvCount, shared_vars_host.ptr_on_device(),ghosted_vars_host.ptr_on_device(), 5);
+      communicate_ghosted_cell_data(mesh_data_->sendCount, mesh_data_->recvCount, shared_vars_host.data(),ghosted_vars_host.data(), 5);
   
       Kokkos::deep_copy(ghosted_vars, ghosted_vars_host);
       insert_ghost_vector<Device, 5> insert_ghost_max(stencil_max_, mesh_data_->recv_local_ids, ghosted_vars);
@@ -622,7 +622,7 @@ class StencilLimiter{
       Device().fence();
       Kokkos::deep_copy(shared_vars_host, shared_vars);
   
-      communicate_ghosted_cell_data(mesh_data_->sendCount, mesh_data_->recvCount, shared_vars_host.ptr_on_device(), ghosted_vars_host.ptr_on_device(), 5);
+      communicate_ghosted_cell_data(mesh_data_->sendCount, mesh_data_->recvCount, shared_vars_host.data(), ghosted_vars_host.data(), 5);
   
       Kokkos::deep_copy(ghosted_vars, ghosted_vars_host);
       insert_ghost_vector<Device, 5> insert_ghost_limiter(limiter, mesh_data_->recv_local_ids, ghosted_vars);

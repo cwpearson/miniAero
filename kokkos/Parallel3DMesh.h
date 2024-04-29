@@ -436,7 +436,7 @@ public:
     Kokkos::View<double*,Device> ghost_volumes("GhostVolumes",total_recv_count);
     typename Kokkos::View<double*,Device>::HostMirror host_ghost_volumes = Kokkos::create_mirror_view(ghost_volumes);
 
-    communicate_ghosted_cell_data(mesh_data.sendCount, mesh_data.recvCount, host_shared_volumes.ptr_on_device(),host_ghost_volumes.ptr_on_device(), 1);
+    communicate_ghosted_cell_data(mesh_data.sendCount, mesh_data.recvCount, host_shared_volumes.data(),host_ghost_volumes.data(), 1);
 
     Kokkos::deep_copy(ghost_volumes,host_ghost_volumes);
 

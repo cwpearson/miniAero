@@ -328,7 +328,7 @@ class GreenGauss {
       Device().fence();
       Kokkos::deep_copy(shared_gradient_vars_host, shared_gradient_vars);
   
-      communicate_ghosted_cell_data(mesh_data_->sendCount, mesh_data_->recvCount, shared_gradient_vars_host.ptr_on_device(),ghosted_gradient_vars_host.ptr_on_device(), 15);
+      communicate_ghosted_cell_data(mesh_data_->sendCount, mesh_data_->recvCount, shared_gradient_vars_host.data(),ghosted_gradient_vars_host.data(), 15);
   
       //copy values to be sent from host to device
       Kokkos::deep_copy(ghosted_gradient_vars, ghosted_gradient_vars_host);

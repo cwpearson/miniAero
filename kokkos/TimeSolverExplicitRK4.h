@@ -365,7 +365,7 @@ void TimeSolverExplicitRK4<Device>::Solve()
           Device().fence();
           Kokkos::deep_copy(shared_conserved_vars_host, shared_conserved_vars);
 
-          communicate_ghosted_cell_data(sendCount, recvCount, shared_conserved_vars_host.ptr_on_device(),ghosted_conserved_vars_host.ptr_on_device(), 5);
+          communicate_ghosted_cell_data(sendCount, recvCount, shared_conserved_vars_host.data(),ghosted_conserved_vars_host.data(), 5);
 
           //copy values to be sent from host to device
           Kokkos::deep_copy(ghosted_conserved_vars, ghosted_conserved_vars_host);
