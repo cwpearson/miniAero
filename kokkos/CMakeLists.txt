@@ -49,3 +49,10 @@ add_test(
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/tests
     COMMAND run_tests.sh ${CMAKE_CURRENT_BINARY_DIR}/miniAero.kokkos
 )
+if (MPI_FOUND AND MINIAERO_ENABLE_MPI)
+    add_test(
+        NAME AllTests-MPI
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/tests
+        COMMAND run_tests.sh ${CMAKE_CURRENT_BINARY_DIR}/miniAero.kokkos MPI
+    )
+endif()
