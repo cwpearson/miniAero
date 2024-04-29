@@ -3,6 +3,7 @@
 green='\e[0;32m'
 red='\e[0;31m'
 NC='\e[0m'
+code=0
 
 EXE=`echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"`
 DO_MPI=`echo $2 | grep MPI | wc -l`
@@ -12,6 +13,7 @@ cd 3D_Sod_Serial
 if [ "$?" -ne 0 ];
 then
   echo -e "${red}3D_Sod_Serial Test Failed${NC}"
+  code=$(($code + 1))
 else
   echo -e "${green} 3D_Sod_Serial Test Passed${NC}"
 fi 
@@ -24,6 +26,7 @@ cd 3D_Sod_Parallel
 if [ "$?" -ne 0 ];
 then
   echo -e "${red}3D_Sod_Parallel Test Failed${NC}"
+  code=$(($code + 1))
 else
   echo -e "${green} 3D_Sod_Parallel Test Passed${NC}"
 fi
@@ -35,6 +38,7 @@ cd Ramp_Serial
 if [ "$?" -ne 0 ];
 then
   echo -e "${red}Ramp_Serial Test Failed${NC}"
+  code=$(($code + 1))
 else
   echo -e "${green} Ramp_Serial Test Passed${NC}"
 fi
@@ -47,6 +51,7 @@ cd Ramp_Parallel
 if [ "$?" -ne 0 ];
 then
   echo -e "${red}Ramp_Parallel Test Failed${NC}"
+  code=$(($code + 1))
 else
   echo -e "${green} Ramp_Parallel Test Passed${NC}"
 fi
@@ -58,6 +63,7 @@ cd FlatPlate_Serial
 if [ "$?" -ne 0 ];
 then
   echo -e "${red}FlatPlate_Serial Test Failed${NC}"
+  code=$(($code + 1))
 else
   echo -e "${green} FlatPlate_Serial Test Passed${NC}"
 fi
@@ -70,8 +76,11 @@ cd FlatPlate_Parallel
 if [ "$?" -ne 0 ];
 then
   echo -e "${red}FlatPlate_Parallel Test Failed${NC}"
+  code=$(($code + 1))
 else
   echo -e "${green} FlatPlate_Parallel Test Passed${NC}"
 fi
 cd ..
 fi
+
+exit $code
