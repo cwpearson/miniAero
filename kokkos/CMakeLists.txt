@@ -11,7 +11,6 @@ project(miniFE LANGUAGES CXX)
 if (MINIAERO_EXTERNAL_KOKKOS)
   find_package(Kokkos REQUIRED)
 else()
-  set(Kokkos_ENABLE_DEPRECATED_CODE ON CACHE BOOL "" FORCE)
   include(FetchContent)
   message(STATUS "Fetch, configure, and build Kokkos 4.3.00...")
   FetchContent_Declare(Kokkos
