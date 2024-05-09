@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cmath>
+#include <random>
 
 #include <Kokkos_Core.hpp>
 #include "MeshData.h"
@@ -359,7 +360,9 @@ public:
 
 
     //Shuffle internal faces
-    std::random_shuffle(mesh_faces.begin(), mesh_faces.end());
+    std::random_device rd;
+    std::shuffle(mesh_faces.begin(), mesh_faces.end(), std::mt19937(rd()));
+
 
     //Fill Faces on Device (through HostMirror)
     copy_faces(internal_faces, mesh_faces);
