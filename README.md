@@ -6,7 +6,10 @@
 * CMake support
   * inlucding CTest
 * Github Actions CI tests
-* `Device::fence()` -> `Device()::fence()`
+* Kokkos 4.3
+  * `Device::fence()` -> `Device()::fence()`
+  * `Kokkos::Impl::Timer` -> `Kokkos::Timer`
+  * `View::dimension_0` -> `View::extent(0)`
 * Testing scripts updated for Python 3
 * C++17 support
   * `std::random_shuffle` -> `std::shuffle`
