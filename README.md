@@ -1,7 +1,7 @@
 # miniAero CFD Mini-Application
 
 > [!CAUTION]
-> Unofficial fork of miniFE by with some tooling updates
+> Unofficial fork of miniFE with some tooling updates
 
 * CMake support
   * inlucding CTest
