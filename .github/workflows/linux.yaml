@@ -133,3 +133,19 @@ jobs:
       - name: Test miniAero
         run: |
           ctest -V --test-dir "$MINIAERO_BUILD" --rerun-failed --output-on-failure
+  Kokkos-Internal-Serial-Release:
+    env:
+      MINIAERO_SRC: ${{ github.workspace }}
+      MINIAERO_BUILD: ${{ github.workspace }}/build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Build miniAero
+        run: |
+          cmake -S "$MINIAERO_SRC"/kokkos -B "$MINIAERO_BUILD" -DMINIAERO_ENABLE_MPI=OFF -DCMAKE_BUILD_TYPE=Release
+          VERBOSE=1 cmake --build "$MINIAERO_BUILD"
+      - name: Test miniAero
+        run: |
+          ctest -V --test-dir "$MINIAERO_BUILD" --rerun-failed --output-on-failure
