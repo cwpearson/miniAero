@@ -3,6 +3,8 @@
 > [!CAUTION]
 > Unofficial fork of miniFE by with some tooling updates
 
+* Testing scripts updated for Python 3
+
 > [!NOTE]  
 > Original Readme follows verbaity
 
