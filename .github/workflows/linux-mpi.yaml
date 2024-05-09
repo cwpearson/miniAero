@@ -79,3 +79,39 @@ jobs:
       - name: Test miniAero
         run: |
           ctest -V --test-dir "$MINIAERO_BUILD" --rerun-failed --output-on-failure
+  Kokkos-040300-OpenMPI-Serial-Release-HostOpts:
+    env:
+      KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
+      KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build
+      KOKKOS_INSTALL: ${{ github.workspace }}/_deps/kokkos-install
+      MINIAERO_SRC: ${{ github.workspace }}
+      MINIAERO_BUILD: ${{ github.workspace }}/build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: System Info
+        run: |
+          nproc
+      - name: Install Packages
+        run: |
+          sudo apt-get update && sudo apt-get install -y libopenmpi-dev openmpi-bin cmake
+          which cmake
+          cmake --version
+          which mpirun
+          mpirun --version
+          which mpicxx
+          mpicxx --version
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Build Kokkos
+        run: |
+          git clone --branch 4.3.00 --depth 1 https://github.com/kokkos/kokkos.git "$KOKKOS_SRC"
+          cmake -S "$KOKKOS_SRC" -B "$KOKKOS_BUILD" -DCMAKE_INSTALL_PREFIX="$KOKKOS_INSTALL" -DCMAKE_BUILD_TYPE=Release -DKokkos_ENABLE_SERIAL=ON -DKokkos_ARCH_NATIVE=ON
+          cmake --build "$KOKKOS_BUILD" --parallel $(nproc) -t install
+      - name: Build miniAero
+        run: |
+          cmake -S "$MINIAERO_SRC"/kokkos -B "$MINIAERO_BUILD" -DMINIAERO_EXTERNAL_KOKKOS=ON -DKokkos_ROOT="$KOKKOS_INSTALL" -DCMAKE_BUILD_TYPE=Release -MINIAERO_KOKKOS_REDUCE_MINMAX_HOST=ON -DMINIAERO_KOKKOS_BINSORT_HOST=ON
+          VERBOSE=1 cmake --build "$MINIAERO_BUILD"
+      - name: Test miniAero
+        run: |
+          ctest -V --test-dir "$MINIAERO_BUILD" --rerun-failed --output-on-failure
