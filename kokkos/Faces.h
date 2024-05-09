@@ -140,13 +140,16 @@ void copy_faces(Faces<Device> device_faces, std::vector<Face> & mesh_faces){
 #endif
 
 #if defined(MINIAERO_KOKKOS_REDUCE_MINMAX_HOST)
-    Kokkos::parallel_reduce(face_cell_left_h.extent(0), KOKKOS_LAMBDA (const int& i, minmax_type& lminmax) {
-      if(face_cell_left_h(i)<lminmax.min_val) lminmax.min_val = face_cell_left_h(i);
-      if(face_cell_left_h(i)>lminmax.max_val) lminmax.max_val = face_cell_left_h(i);
-    },reducer_type(minmax));
+    Kokkos::parallel_reduce(
+      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, face_cell_left_h.extent(0)), 
+      KOKKOS_LAMBDA (const int& i, minmax_type& lminmax) {
+        if(face_cell_left_h(i)<lminmax.min_val) lminmax.min_val = face_cell_left_h(i);
+        if(face_cell_left_h(i)>lminmax.max_val) lminmax.max_val = face_cell_left_h(i);
+      },
+      reducer_type(minmax));
 #else
     Kokkos::parallel_reduce(
-      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, face_cell_left.extent(0)),
+      face_cell_left.extent(0),
       KOKKOS_LAMBDA (const int& i, minmax_type& lminmax) {
         if(face_cell_left(i)<lminmax.min_val) lminmax.min_val = face_cell_left(i);
         if(face_cell_left(i)>lminmax.max_val) lminmax.max_val = face_cell_left(i);
