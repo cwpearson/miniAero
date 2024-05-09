@@ -3,9 +3,14 @@
 > [!CAUTION]
 > Unofficial fork of miniFE by with some tooling updates
 
+
+* Github Actions CI tests
+* `Device::fence()` -> `Device()::fence()`
 * Testing scripts updated for Python 3
 * C++17 support
-  * `std::random_shuffle` was removed in favor of `std::shuffle`
+  * `std::random_shuffle` -> `std::shuffle`
+
+[Click here](https://github.com/Mantevo/miniAero/compare/master..cwpearson:miniAero:master) to see all comparisons in one place
 
 > [!NOTE]  
 > Original Readme follows verbatim
