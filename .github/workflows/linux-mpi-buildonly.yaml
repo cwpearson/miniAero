@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     
 jobs:
-   Kokkos-040300-OpenMPI-OpenMP-Release:
+  Kokkos-040300-OpenMPI-OpenMP-Release:
     env:
       KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
       KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build
@@ -38,7 +38,7 @@ jobs:
         run: |
           cmake -S "$MINIAERO_SRC"/kokkos -B "$MINIAERO_BUILD" -DMINIAERO_EXTERNAL_KOKKOS=ON -DKokkos_ROOT="$KOKKOS_INSTALL" -DCMAKE_BUILD_TYPE=Release
           VERBOSE=1 cmake --build "$MINIAERO_BUILD"
-   Kokkos-040300-OpenMPI-OpenMP-Debug:
+  Kokkos-040300-OpenMPI-OpenMP-Debug:
     env:
       KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
       KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     
 jobs:
-   Kokkos-040300-OpenMPI-Serial-Release:
+  Kokkos-040300-OpenMPI-Serial-Release:
     env:
       KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
       KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build
@@ -44,7 +44,7 @@ jobs:
       - name: Test miniAero
         run: |
           ctest -V --test-dir "$MINIAERO_BUILD" --rerun-failed --output-on-failure
-   Kokkos-040300-OpenMPI-Serial-Debug:
+  Kokkos-040300-OpenMPI-Serial-Debug:
     env:
       KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
       KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build

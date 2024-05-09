@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     
 jobs:
-   Kokkos-040300-OpenMP-Release:
+  Kokkos-040300-OpenMP-Release:
     env:
       KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
       KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build
@@ -33,7 +33,7 @@ jobs:
       - name: Test miniAero
         run: |
           ctest -V --test-dir "$MINIAERO_BUILD" --rerun-failed --output-on-failure
-   Kokkos-040300-OpenMP-Debug:
+  Kokkos-040300-OpenMP-Debug:
     env:
       KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
       KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build
@@ -58,7 +58,7 @@ jobs:
       - name: Test miniAero
         run: |
           ctest -V --test-dir "$MINIAERO_BUILD" --rerun-failed --output-on-failure
-   Kokkos-040300-Serial-Release:
+  Kokkos-040300-Serial-Release:
     env:
       KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
       KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build
@@ -83,7 +83,7 @@ jobs:
       - name: Test miniAero
         run: |
           ctest -V --test-dir "$MINIAERO_BUILD" --rerun-failed --output-on-failure
-   Kokkos-040300-Serial-Debug:
+  Kokkos-040300-Serial-Debug:
     env:
       KOKKOS_SRC: ${{ github.workspace }}/_deps/kokkos
       KOKKOS_BUILD: ${{ github.workspace }}/_deps/kokkos-build
