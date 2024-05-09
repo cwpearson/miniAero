@@ -1,6 +1,9 @@
 #!/bin/bash
+
+set -x
+
 echo "Running parallel flat plate test using 8 processors."
-mpirun -np 8 $1 &> /dev/null
+mpirun -np 8 --oversubscribe $1 &> /dev/null
 diff=0
 for i in `seq 0 7`;
 do 
@@ -14,5 +17,5 @@ else
   ESTATUS=0
 fi
 
-rm results.? gradients.? limiters.? setupmesh.?
+rm -vf  results.? gradients.? limiters.? setupmesh.?
 exit $ESTATUS

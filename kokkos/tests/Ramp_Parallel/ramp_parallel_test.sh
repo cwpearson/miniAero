@@ -1,6 +1,9 @@
 #!/bin/bash
+
+set -x
+
 echo "Running parallel ramp test using 16 processors."
-mpirun -np 16 $1 &> /dev/null
+mpirun -np 16 --oversubscribe $1 &> /dev/null
 diff=0
 for i in `seq 0 15`;
 do 
@@ -14,6 +17,6 @@ else
   ESTATUS=0
 fi
 
-rm results.? gradients.? limiters.? setupmesh.?
-rm results.?? gradients.?? limiters.?? setupmesh.??
+rm -vf  results.? gradients.? limiters.? setupmesh.?
+rm -vf  results.?? gradients.?? limiters.?? setupmesh.??
 exit $ESTATUS

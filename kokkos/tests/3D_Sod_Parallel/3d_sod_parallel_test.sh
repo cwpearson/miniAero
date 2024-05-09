@@ -3,8 +3,7 @@
 set -x
 
 echo "Running parallel 3D sod test using 4 processors."
-#mpirun -np 4 $1 &> /dev/null
-mpirun -np 4 $1 
+mpirun -np 4 --oversubscribe $1 &> /dev/null
 diff=0
 for i in `seq 0 3`;
 do 
