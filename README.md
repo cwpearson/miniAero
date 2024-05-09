@@ -4,9 +4,11 @@
 > Unofficial fork of miniFE by with some tooling updates
 
 * Testing scripts updated for Python 3
+* C++17 support
+  * `std::random_shuffle` was removed in favor of `std::shuffle`
 
 > [!NOTE]  
-> Original Readme follows verbaity
+> Original Readme follows verbatim
 
 # miniAero CFD Mini-Application
 
