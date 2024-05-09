@@ -7,7 +7,7 @@
   * inlucding CTest
 * Github Actions CI tests
 * Kokkos 4.3
-  * `Device::fence()` -> `Device()::fence()`
+  * `Device::fence()` -> `Device().fence()`
   * `Kokkos::Impl::Timer` -> `Kokkos::Timer`
   * `View::dimension_0` -> `View::extent(0)`
 * Testing scripts updated for Python 3
