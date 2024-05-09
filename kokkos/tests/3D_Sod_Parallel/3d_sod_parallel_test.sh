@@ -1,6 +1,10 @@
 #!/bin/bash
+
+set -x
+
 echo "Running parallel 3D sod test using 4 processors."
-mpirun -np 4 $1 &> /dev/null
+#mpirun -np 4 $1 &> /dev/null
+mpirun -np 4 $1 
 diff=0
 for i in `seq 0 3`;
 do 
@@ -14,5 +18,5 @@ else
   ESTATUS=0
 fi
 
-rm results.? gradients.? limiters.? setupmesh.?
+rm -vf results.? gradients.? limiters.? setupmesh.?
 exit $ESTATUS

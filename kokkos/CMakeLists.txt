@@ -13,7 +13,7 @@ else()
   include(FetchContent)
   message(STATUS "Fetch, configure, and build Kokkos 4.3.00...")
   FetchContent_Declare(Kokkos
-    GIT_REPOSITORY    git@github.com:kokkos/kokkos.git
+    GIT_REPOSITORY    https://github.com/kokkos/kokkos.git
     GIT_TAG           4.3.00
   )
   FetchContent_MakeAvailable(Kokkos)
