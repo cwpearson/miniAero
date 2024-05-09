@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR) # same as Kokkos 4.3
 
 option(MINIAERO_ENABLE_MPI "Enable MPI support" ON)
 option(MINIAERO_EXTERNAL_KOKKOS "Use out-of-tree Kokkos" OFF)
+option(MINIAERO_KOKKOS_REDUCE_MINMAX_HOST "Run minmax parallel_reduce in host space" OFF)
+option(MINIAERO_KOKKOS_BINSORT_HOST "Run Kokkos::Binsort in host space" OFF)
 
 project(miniFE LANGUAGES CXX)
 
@@ -34,6 +36,12 @@ foreach(INCL_DIR ${MINIAERO_INCL_DIRS})
   target_include_directories(miniAero.kokkos PRIVATE ${INCL_DIR})
 endforeach()
 target_compile_definitions(miniAero.kokkos PRIVATE ATOMICS_FLUX) # needed for correctness
+if (MINIAERO_KOKKOS_REDUCE_MINMAX_HOST)
+  target_compile_definitions(miniAero.kokkos PRIVATE MINIAERO_KOKKOS_REDUCE_MINMAX_HOST)
+endif()
+if (MINIAERO_KOKKOS_BINSORT_HOST)
+  target_compile_definitions(miniAero.kokkos PRIVATE MINIAERO_KOKKOS_BINSORT_HOST)
+endif()
 
 if (MPI_FOUND AND MINIAERO_ENABLE_MPI)
   message(STATUS "MPI_VERSION =                 ${MPI_VERSION}")
