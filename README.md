@@ -13,8 +13,17 @@
 * Testing scripts updated for Python 3
 * C++17 support
   * `std::random_shuffle` -> `std::shuffle`
+* Can optionally run Kokkos::MinMax parallel_reduce in Kokkos::DefaultHostExecutionSpace
+* Can optionally run Kokkos::BinSort in Kokkos::DefaultHostExecutionSpace
 
 [Click here](https://github.com/Mantevo/miniAero/compare/master..cwpearson:miniAero:master) to see all comparisons in one place
+
+## Building
+
+* -DMINIAERO_KOKKOS_REDUCE_MINMAX_HOST: "Run minmax parallel_reduce in host space"
+* -DMINIAERO_KOKKOS_BINSORT_HOST: "Run Kokkos::Binsort in host space"
+
+<hr>
 
 > [!NOTE]  
 > Original Readme follows verbatim
