@@ -133,12 +133,34 @@ void copy_faces(Faces<Device> device_faces, std::vector<Face> & mesh_faces){
     typedef Kokkos::MinMax<int,Device> reducer_type;
     typedef typename reducer_type::value_type minmax_type;
     minmax_type minmax;
-    Kokkos::parallel_reduce(face_cell_left.extent(0), KOKKOS_LAMBDA (const int& i, minmax_type& lminmax) {
-      if(face_cell_left(i)<lminmax.min_val) lminmax.min_val = face_cell_left(i);
-      if(face_cell_left(i)>lminmax.max_val) lminmax.max_val = face_cell_left(i);
-    },reducer_type(minmax));
 
+#if defined(MINIAERO_KOKKOS_REDUCE_MINMAX_HOST) || defined(MINIAERO_KOKKOS_BINSORT_HOST)
+    auto face_cell_left_h = Kokkos::create_mirror_view_and_copy(
+      Kokkos::DefaultHostExecutionSpace(), face_cell_left);
+#endif
+
+#if defined(MINIAERO_KOKKOS_REDUCE_MINMAX_HOST)
+    Kokkos::parallel_reduce(face_cell_left_h.extent(0), KOKKOS_LAMBDA (const int& i, minmax_type& lminmax) {
+      if(face_cell_left_h(i)<lminmax.min_val) lminmax.min_val = face_cell_left_h(i);
+      if(face_cell_left_h(i)>lminmax.max_val) lminmax.max_val = face_cell_left_h(i);
+    },reducer_type(minmax));
+#else
+    Kokkos::parallel_reduce(
+      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, face_cell_left.extent(0)),
+      KOKKOS_LAMBDA (const int& i, minmax_type& lminmax) {
+        if(face_cell_left(i)<lminmax.min_val) lminmax.min_val = face_cell_left(i);
+        if(face_cell_left(i)>lminmax.max_val) lminmax.max_val = face_cell_left(i);
+      },reducer_type(minmax));
+#endif
+
+#if defined(MINIAERO_KOKKOS_BINSORT_HOST)
+    Kokkos::BinSort<view_type, CompType, Kokkos::DefaultHostExecutionSpace, int> bin_sort(
+      face_cell_left_h,
+      CompType(face_cell_left_h.extent(0)/2,minmax.min_val,minmax.max_val),
+      true);
+#else
     Kokkos::BinSort<view_type, CompType, Device, int> bin_sort(face_cell_left,CompType(face_cell_left.extent(0)/2,minmax.min_val,minmax.max_val),true);
+#endif
     bin_sort.create_permute_vector();
     Kokkos::deep_copy(device_faces.permute_vector_, bin_sort.sort_order);
   }
