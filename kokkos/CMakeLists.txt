@@ -1,18 +1,23 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR) # same as Kokkos 4.3
 
 option(MINIAERO_ENABLE_MPI "Enable MPI support" ON)
+option(MINIAERO_EXTERNAL_KOKKOS "Use out-of-tree Kokkos" OFF)
 
 project(miniFE LANGUAGES CXX)
 
 # needed for View::dimension_0
-set(Kokkos_ENABLE_DEPRECATED_CODE ON CACHE BOOL "" FORCE)
-include(FetchContent)
-message(STATUS "Fetch, configure, and build Kokkos 4.3.00...")
-FetchContent_Declare(Kokkos
-  GIT_REPOSITORY    git@github.com:kokkos/kokkos.git
-  GIT_TAG           4.3.00
-)
-FetchContent_MakeAvailable(Kokkos)
+if (MINIAERO_EXTERNAL_KOKKOS)
+  find_package(Kokkos REQUIRED)
+else()
+  set(Kokkos_ENABLE_DEPRECATED_CODE ON CACHE BOOL "" FORCE)
+  include(FetchContent)
+  message(STATUS "Fetch, configure, and build Kokkos 4.3.00...")
+  FetchContent_Declare(Kokkos
+    GIT_REPOSITORY    git@github.com:kokkos/kokkos.git
+    GIT_TAG           4.3.00
+  )
+  FetchContent_MakeAvailable(Kokkos)
+endif()
 
 if(MINIAERO_ENABLE_MPI)
   find_package(MPI REQUIRED)
