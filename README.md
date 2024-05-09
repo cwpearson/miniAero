@@ -3,7 +3,8 @@
 > [!CAUTION]
 > Unofficial fork of miniFE by with some tooling updates
 
-
+* CMake support
+  * inlucding CTest
 * Github Actions CI tests
 * `Device::fence()` -> `Device()::fence()`
 * Testing scripts updated for Python 3
