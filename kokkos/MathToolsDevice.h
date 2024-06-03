@@ -71,11 +71,11 @@ public:
 
    KOKKOS_INLINE_FUNCTION static double min(double val1, double val2)
    {
-     return std::min(val1, val2);
+     return Kokkos::min(val1, val2);
    }
    KOKKOS_INLINE_FUNCTION static double max(double val1, double val2)
    {
-     return std::max(val1, val2);
+     return Kokkos::max(val1, val2);
    }
 };
 #ifdef KOKKOS_HAVE_CUDA
