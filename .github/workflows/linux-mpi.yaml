@@ -111,7 +111,7 @@ jobs:
           cmake --build "$KOKKOS_BUILD" --parallel $(nproc) -t install
       - name: Build miniAero
         run: |
-          cmake -S "$MINIAERO_SRC"/kokkos -B "$MINIAERO_BUILD" -DMINIAERO_EXTERNAL_KOKKOS=ON -DKokkos_ROOT="$KOKKOS_INSTALL" -DCMAKE_BUILD_TYPE=Release -MINIAERO_KOKKOS_REDUCE_MINMAX_HOST=ON -DMINIAERO_KOKKOS_BINSORT_HOST=ON
+          cmake -S "$MINIAERO_SRC"/kokkos -B "$MINIAERO_BUILD" -DMINIAERO_EXTERNAL_KOKKOS=ON -DKokkos_ROOT="$KOKKOS_INSTALL" -DCMAKE_BUILD_TYPE=Release -DMINIAERO_KOKKOS_REDUCE_MINMAX_HOST=ON -DMINIAERO_KOKKOS_BINSORT_HOST=ON
           VERBOSE=1 cmake --build "$MINIAERO_BUILD"
       - name: Test miniAero
         run: |
