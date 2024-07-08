@@ -445,7 +445,7 @@ void TimeSolverExplicitRK4<Device>::Solve()
           Faces<Device> bc_faces = *tf_iter;
           const int nboundary_faces = bc_faces.nfaces_;
 
-#if defined(MINIAERO_SPLIT_COMPUTE_TAGENTBC_FLUX)
+#if defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
           using Op = compute_tangentBC_flux<Device, roe_flux<Device> >;
           Kokkos::View<double *[5]> flux_step1("intermediate view for split compute_tangentBC_flux", nboundary_faces);
           Op boundary_fluxop(bc_faces, sol_temp_vec, cells, inviscid_flux_evaluator, flux_step1);

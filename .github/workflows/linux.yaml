@@ -123,7 +123,7 @@ jobs:
           cmake --build "$KOKKOS_BUILD" --parallel $(nproc) -t install
       - name: Build miniAero
         run: |
-          cmake -S "$MINIAERO_SRC"/kokkos -B "$MINIAERO_BUILD" -DMINIAERO_ENABLE_MPI=OFF -DMINIAERO_EXTERNAL_KOKKOS=ON -DKokkos_ROOT="$KOKKOS_INSTALL" -DCMAKE_BUILD_TYPE=Debug -DMINIAERO_SPLIT_COMPUTE_TAGENTBC_FLUX=ON
+          cmake -S "$MINIAERO_SRC"/kokkos -B "$MINIAERO_BUILD" -DMINIAERO_ENABLE_MPI=OFF -DMINIAERO_EXTERNAL_KOKKOS=ON -DKokkos_ROOT="$KOKKOS_INSTALL" -DCMAKE_BUILD_TYPE=Debug -DMINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX=ON
           VERBOSE=1 cmake --build "$MINIAERO_BUILD"
       - name: Test miniAero
         run: |

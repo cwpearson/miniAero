@@ -59,7 +59,7 @@ struct compute_tangentBC_flux {
   vector_field_type face_normal_, face_tangent_, face_binormal_;
   FluxType flux_evaluator_;
 
-#if defined(MINIAERO_SPLIT_COMPUTE_TAGENTBC_FLUX)
+#if defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
   Kokkos::View<double *[5]> flux_step1_;
   compute_tangentBC_flux(Faces<Device> faces, solution_field_type cell_values,
       Cells<Device> cells, FluxType flux, Kokkos::View<double *[5]> flux_step1) :
@@ -81,7 +81,7 @@ struct compute_tangentBC_flux {
 #endif
 
 // original fused flux function
-#if !defined(MINIAERO_SPLIT_COMPUTE_TAGENTBC_FLUX)
+#if !defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
   KOKKOS_INLINE_FUNCTION
   void operator()(int i) const {
     int index = face_cell_conn_(i, 0);
@@ -137,7 +137,7 @@ struct compute_tangentBC_flux {
 #endif
 
 
-#if defined(MINIAERO_SPLIT_COMPUTE_TAGENTBC_FLUX)
+#if defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
 
   // tags to split the kernel into two parts
   struct Step1 {};
@@ -216,7 +216,7 @@ struct compute_tangentBC_flux {
 
   }
 
-#endif // MINIAERO_SPLIT_COMPUTE_TAGENTBC_FLUX
+#endif // MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX
 
 };
 
