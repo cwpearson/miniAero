@@ -4,6 +4,7 @@ option(MINIAERO_ENABLE_MPI "Enable MPI support" ON)
 option(MINIAERO_EXTERNAL_KOKKOS "Use out-of-tree Kokkos" OFF)
 option(MINIAERO_KOKKOS_REDUCE_MINMAX_HOST "Run minmax parallel_reduce in host space" OFF)
 option(MINIAERO_KOKKOS_BINSORT_HOST "Run Kokkos::Binsort in host space" OFF)
+option(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX "Split compute_tangentBC_flux kernel into two smaller kernels" OFF)
 
 project(miniFE LANGUAGES CXX)
 
@@ -40,6 +41,9 @@ if (MINIAERO_KOKKOS_REDUCE_MINMAX_HOST)
 endif()
 if (MINIAERO_KOKKOS_BINSORT_HOST)
   target_compile_definitions(miniAero.kokkos PRIVATE MINIAERO_KOKKOS_BINSORT_HOST)
+endif()
+if (MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
+  target_compile_definitions(miniAero.kokkos PRIVATE MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
 endif()
 
 if (MPI_FOUND AND MINIAERO_ENABLE_MPI)

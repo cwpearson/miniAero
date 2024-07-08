@@ -444,8 +444,17 @@ void TimeSolverExplicitRK4<Device>::Solve()
         for(; tf_iter != tf_iter_end; ++tf_iter){
           Faces<Device> bc_faces = *tf_iter;
           const int nboundary_faces = bc_faces.nfaces_;
+
+#if defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
+          using Op = compute_tangentBC_flux<Device, roe_flux<Device> >;
+          Kokkos::View<double *[5]> flux_step1("intermediate view for split compute_tangentBC_flux", nboundary_faces);
+          Op boundary_fluxop(bc_faces, sol_temp_vec, cells, inviscid_flux_evaluator, flux_step1);
+          Kokkos::parallel_for(Kokkos::RangePolicy<typename Op::Step1>(0, nboundary_faces), boundary_fluxop);
+          Kokkos::parallel_for(Kokkos::RangePolicy<typename Op::Step2>(0, nboundary_faces), boundary_fluxop);
+#else
           compute_tangentBC_flux<Device, roe_flux<Device> > boundary_fluxop(bc_faces, sol_temp_vec, cells, inviscid_flux_evaluator);
           Kokkos::parallel_for(nboundary_faces,boundary_fluxop);
+#endif
         }
         Device().fence();
 
