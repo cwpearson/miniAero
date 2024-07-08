@@ -60,14 +60,14 @@ struct compute_tangentBC_flux {
   FluxType flux_evaluator_;
 
 #if defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
-  Kokkos::View<double *[5]> flux_step1_;
+  Kokkos::View<double *[5]> primitives_l_step1_, primitives_r_step1_;
   compute_tangentBC_flux(Faces<Device> faces, solution_field_type cell_values,
-      Cells<Device> cells, FluxType flux, Kokkos::View<double *[5]> flux_step1) :
+      Cells<Device> cells, FluxType flux, Kokkos::View<double *[5]> primitives_l_step1, Kokkos::View<double *[5]> primitives_r_step1) :
       face_cell_conn_(faces.face_cell_conn_), cell_flux_index_(
           faces.cell_flux_index_), cell_values_(cell_values), cell_flux_(
           cells.cell_flux_), face_normal_(faces.face_normal_), face_tangent_(
           faces.face_tangent_), face_binormal_(faces.face_binormal_), flux_evaluator_(
-          flux), flux_step1_(flux_step1) {
+          flux), primitives_l_step1_(primitives_l_step1), primitives_r_step1_(primitives_r_step1) {
   }
 #else
   compute_tangentBC_flux(Faces<Device> faces, solution_field_type cell_values,
@@ -177,28 +177,31 @@ struct compute_tangentBC_flux {
     primitives_r[3] = primitives_l[3] - 2 * uboundary * face_normal_(i, 2) / area_norm;
     primitives_r[4] = primitives_l[4];
 
-    flux_evaluator_.compute_flux(primitives_l, primitives_r, flux, &face_normal_(i,0),
-        &face_tangent_(i,0), &face_binormal_(i,0));
-
-
-    // write out flux, to be used in step 2
-    for (int icomp = 0; icomp < 5; ++icomp)
-      flux_step1_(i, icomp) = flux[icomp];
+    // write out primitives_l and primitives_r, used in step2
+    for (int icomp = 0; icomp < 5; ++icomp) {
+      primitives_l_step1_(i, icomp) = primitives_l[icomp];
+      primitives_r_step1_(i, icomp) = primitives_r[icomp];
+    }
   }
 
 
-    // second part of split flux function (first part above)
+  // second part of split flux function (first part above)
   KOKKOS_INLINE_FUNCTION
   void operator()(Step2, int i) const {
     int index = face_cell_conn_(i, 0);
-
-    // retrieve flux, from step 1
     double flux[5];
-    for (int icomp = 0; icomp < 5; ++icomp)
-      flux[icomp] = flux_step1_(i, icomp);
+    double primitives_r[5];
+    double primitives_l[5];
 
+    // retrieve primitives_l and primitives_r from step1
+    for (int icomp = 0; icomp < 5; ++icomp) {
+      primitives_l[icomp] = primitives_l_step1_(i, icomp);
+      primitives_r[icomp] = primitives_r_step1_(i, icomp);
+    }
 
-    // read in flux, from step 1
+    flux_evaluator_.compute_flux(primitives_l, primitives_r, flux, &face_normal_(i,0),
+        &face_tangent_(i,0), &face_binormal_(i,0));
+
 #ifdef ATOMICS_FLUX
     for (int icomp = 0; icomp < 5; ++icomp)
     {
