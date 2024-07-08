@@ -4,7 +4,7 @@
 > Unofficial fork of miniFE with some tooling updates
 
 * CMake support
-  * inlucding CTest
+  * including CTest
 * Github Actions CI tests
 * Kokkos 4.3
   * `Device::fence()` -> `Device().fence()`
@@ -13,8 +13,8 @@
 * Testing scripts updated for Python 3
 * C++17 support
   * `std::random_shuffle` -> `std::shuffle`
-* Can optionally run Kokkos::MinMax parallel_reduce in Kokkos::DefaultHostExecutionSpace
-* Can optionally run Kokkos::BinSort in Kokkos::DefaultHostExecutionSpace
+* Can optionally run `Kokkos::MinMax` `parallel_reduce` in `Kokkos::DefaultHostExecutionSpace`
+* Can optionally run `Kokkos::BinSort` in `Kokkos::DefaultHostExecutionSpace`
 
 [Click here](https://github.com/Mantevo/miniAero/compare/master..cwpearson:miniAero:master) to see all comparisons in one place
 
