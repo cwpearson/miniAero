@@ -20,8 +20,9 @@
 
 ## Building
 
-* -DMINIAERO_KOKKOS_REDUCE_MINMAX_HOST: "Run minmax parallel_reduce in host space"
-* -DMINIAERO_KOKKOS_BINSORT_HOST: "Run Kokkos::Binsort in host space"
+* `-DMINIAERO_KOKKOS_REDUCE_MINMAX_HOST`: "Run minmax parallel_reduce in host space"
+* `-DMINIAERO_KOKKOS_BINSORT_HOST`: "Run Kokkos::Binsort in host space"
+* `-DMINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX`: Split `compute_tangentBC_flux` kernel into two smaller kernels.
 
 <hr>
 
