@@ -60,14 +60,13 @@ struct compute_tangentBC_flux {
   FluxType flux_evaluator_;
 
 #if defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
-  Kokkos::View<double *[5]> primitives_l_step1_, primitives_r_step1_;
   compute_tangentBC_flux(Faces<Device> faces, solution_field_type cell_values,
-      Cells<Device> cells, FluxType flux, Kokkos::View<double *[5]> primitives_l_step1, Kokkos::View<double *[5]> primitives_r_step1) :
+      Cells<Device> cells, FluxType flux, Kokkos::View<typename FluxType::State*> states) :
       face_cell_conn_(faces.face_cell_conn_), cell_flux_index_(
           faces.cell_flux_index_), cell_values_(cell_values), cell_flux_(
           cells.cell_flux_), face_normal_(faces.face_normal_), face_tangent_(
           faces.face_tangent_), face_binormal_(faces.face_binormal_), flux_evaluator_(
-          flux), primitives_l_step1_(primitives_l_step1), primitives_r_step1_(primitives_r_step1) {
+          flux), states_(states) {
   }
 #else
   compute_tangentBC_flux(Faces<Device> faces, solution_field_type cell_values,
@@ -80,8 +79,8 @@ struct compute_tangentBC_flux {
   }
 #endif
 
-// original fused flux function
 #if !defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
+// original fused flux function
   KOKKOS_INLINE_FUNCTION
   void operator()(int i) const {
     int index = face_cell_conn_(i, 0);
@@ -134,6 +133,7 @@ struct compute_tangentBC_flux {
 #endif
 
   }
+
 #endif
 
 
@@ -142,6 +142,9 @@ struct compute_tangentBC_flux {
   // tags to split the kernel into two parts
   struct Step1 {};
   struct Step2 {};
+
+
+  Kokkos::View<typename FluxType::State*> states_;
 
   // first part of split flux function (second part below)
   KOKKOS_INLINE_FUNCTION
@@ -177,11 +180,15 @@ struct compute_tangentBC_flux {
     primitives_r[3] = primitives_l[3] - 2 * uboundary * face_normal_(i, 2) / area_norm;
     primitives_r[4] = primitives_l[4];
 
-    // write out primitives_l and primitives_r, used in step2
+    states_(i) = flux_evaluator_.compute_flux_1(primitives_l, primitives_r, flux, &face_normal_(i,0),
+        &face_tangent_(i,0), &face_binormal_(i,0));
+
     for (int icomp = 0; icomp < 5; ++icomp) {
-      primitives_l_step1_(i, icomp) = primitives_l[icomp];
-      primitives_r_step1_(i, icomp) = primitives_r[icomp];
+      states_(i).flux[icomp] = flux[icomp];
+      states_(i).primitives_l[icomp] = primitives_l[icomp];
+      states_(i).primitives_r[icomp] = primitives_r[icomp];
     }
+
   }
 
 
@@ -189,24 +196,15 @@ struct compute_tangentBC_flux {
   KOKKOS_INLINE_FUNCTION
   void operator()(Step2, int i) const {
     int index = face_cell_conn_(i, 0);
-    double flux[5];
-    double primitives_r[5];
-    double primitives_l[5];
 
-    // retrieve primitives_l and primitives_r from step1
-    for (int icomp = 0; icomp < 5; ++icomp) {
-      primitives_l[icomp] = primitives_l_step1_(i, icomp);
-      primitives_r[icomp] = primitives_r_step1_(i, icomp);
-    }
-
-    flux_evaluator_.compute_flux(primitives_l, primitives_r, flux, &face_normal_(i,0),
-        &face_tangent_(i,0), &face_binormal_(i,0));
+    flux_evaluator_.compute_flux_2(states_(i).primitives_l, states_(i).primitives_r, states_(i).flux, &face_normal_(i,0),
+        &face_tangent_(i,0), &face_binormal_(i,0), states_(i));
 
 #ifdef ATOMICS_FLUX
     for (int icomp = 0; icomp < 5; ++icomp)
     {
       double * cell = &cell_flux_(index,0,icomp);
-      Kokkos::atomic_add(cell, -flux[icomp]);
+      Kokkos::atomic_add(cell, -states_(i).flux[icomp]);
     }
 #endif
 
