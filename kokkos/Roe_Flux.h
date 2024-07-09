@@ -268,12 +268,26 @@ struct roe_flux {
 #if defined(MINIAERO_SPLIT_COMPUTE_TANGENTBC_FLUX)
 
     struct State {
+        double gm1;
         double ldq[5];
         double rlldq[5];
-        double roe_mat_eigenvectors[25];
+        double half_speed_sound_squared_inverse;
+        double speed_sound_squared_inverse;
+        double speed_sound_roe;
+        double enthalpy_roe;
+        double kinetic_energy_roe;
         double flux[5];
+        double uvel_roe;
+        double vvel_roe;
+        double wvel_roe;
+        double normal_velocity;
+        double tangent_velocity;
+        double binormal_velocity;
         double primitives_l[5];
         double primitives_r[5];
+        double face_normal_unit[3];
+        double face_tangent_unit[3];
+        double face_binormal_unit[3];
     };
 
   KOKKOS_INLINE_FUNCTION
@@ -462,39 +476,59 @@ struct roe_flux {
 
     for (int j = 0; j < 5; ++j)
       state.ldq[j] = (eigp[j] - eigm[j]) * state.ldq[j];
-      
-    // Right matrix
-    state.roe_mat_eigenvectors[0] = half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[1] = half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[2] = -gm1 * speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[3] = 0.0;
-    state.roe_mat_eigenvectors[4] = 0.0;
-      
-    state.roe_mat_eigenvectors[5] = (uvel_roe + face_normal_unit[0] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[6] = (uvel_roe - face_normal_unit[0] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[7] = -gm1 * uvel_roe * speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[8] = face_tangent_unit[0];
-    state.roe_mat_eigenvectors[9] = face_binormal_unit[0];
-      
-    state.roe_mat_eigenvectors[10] = (vvel_roe + face_normal_unit[1] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[11] = (vvel_roe - face_normal_unit[1] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[12] = -gm1 * vvel_roe * speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[13] = face_tangent_unit[1];
-    state.roe_mat_eigenvectors[14] = face_binormal_unit[1];
-      
-    state.roe_mat_eigenvectors[15] = (wvel_roe + face_normal_unit[2] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[16] = (wvel_roe - face_normal_unit[2] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[17] = -gm1 * wvel_roe * speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[18] = face_tangent_unit[2];
-    state.roe_mat_eigenvectors[19] = face_binormal_unit[2];
-      
-    state.roe_mat_eigenvectors[20] = (enthalpy_roe + kinetic_energy_roe + speed_sound_roe * normal_velocity) * half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[21] = (enthalpy_roe + kinetic_energy_roe - speed_sound_roe * normal_velocity) * half_speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[22] = (speed_sound_roe * speed_sound_roe - gm1 * (enthalpy_roe + kinetic_energy_roe)) * speed_sound_squared_inverse;
-    state.roe_mat_eigenvectors[23] = tangent_velocity;
-    state.roe_mat_eigenvectors[24] = binormal_velocity;
+
+    state.half_speed_sound_squared_inverse = half_speed_sound_squared_inverse;
+    state.gm1 = gm1;
+    state.speed_sound_squared_inverse = speed_sound_squared_inverse;
+    state.uvel_roe = uvel_roe;
+    state.vvel_roe = vvel_roe;
+    state.wvel_roe = wvel_roe;
+    state.speed_sound_roe = speed_sound_roe;
+    state.enthalpy_roe = enthalpy_roe;
+    state.kinetic_energy_roe = kinetic_energy_roe;
+    state.normal_velocity = normal_velocity;
+    state.tangent_velocity = tangent_velocity;
+    state.binormal_velocity = binormal_velocity;
+    for (int icomp = 0; icomp < 3; ++icomp) {
+        state.face_normal_unit[icomp] = face_normal_unit[icomp];
+        state.face_tangent_unit[icomp] = face_tangent_unit[icomp];
+        state.face_binormal_unit[icomp] = face_binormal_unit[icomp];
+    }
+    
 
 #if 0
+    // Right matrix
+    roe_mat_eigenvectors[0] = half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[1] = half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[2] = -gm1 * speed_sound_squared_inverse;
+    roe_mat_eigenvectors[3] = 0.0;
+    roe_mat_eigenvectors[4] = 0.0;
+      
+    roe_mat_eigenvectors[5] = (uvel_roe + face_normal_unit[0] * speed_sound_roe) * half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[6] = (uvel_roe - face_normal_unit[0] * speed_sound_roe) * half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[7] = -gm1 * uvel_roe * speed_sound_squared_inverse;
+    roe_mat_eigenvectors[8] = face_tangent_unit[0];
+    roe_mat_eigenvectors[9] = face_binormal_unit[0];
+      
+    roe_mat_eigenvectors[10] = (vvel_roe + face_normal_unit[1] * speed_sound_roe) * half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[11] = (vvel_roe - face_normal_unit[1] * speed_sound_roe) * half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[12] = -gm1 * vvel_roe * speed_sound_squared_inverse;
+    roe_mat_eigenvectors[13] = face_tangent_unit[1];
+    roe_mat_eigenvectors[14] = face_binormal_unit[1];
+      
+    roe_mat_eigenvectors[15] = (wvel_roe + face_normal_unit[2] * speed_sound_roe) * half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[16] = (wvel_roe - face_normal_unit[2] * speed_sound_roe) * half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[17] = -gm1 * wvel_roe * speed_sound_squared_inverse;
+    roe_mat_eigenvectors[18] = face_tangent_unit[2];
+    roe_mat_eigenvectors[19] = face_binormal_unit[2];
+      
+    roe_mat_eigenvectors[20] = (enthalpy_roe + kinetic_energy_roe + speed_sound_roe * normal_velocity) * half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[21] = (enthalpy_roe + kinetic_energy_roe - speed_sound_roe * normal_velocity) * half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[22] = (speed_sound_roe * speed_sound_roe - gm1 * (enthalpy_roe + kinetic_energy_roe)) * speed_sound_squared_inverse;
+    roe_mat_eigenvectors[23] = tangent_velocity;
+    roe_mat_eigenvectors[24] = binormal_velocity;
+
+
     MathTools<execution_space>::MatVec5(1.0, roe_mat_eigenvectors, state.ldq, 0.0, state.rlldq);
     for (int icomp = 0; icomp < 5; ++icomp)
       flux[icomp] -= 0.5*rlldq[icomp];
@@ -683,40 +717,41 @@ struct roe_flux {
 
     for (int j = 0; j < 5; ++j)
       ldq[j] = (eigp[j] - eigm[j]) * ldq[j];
-      
+#endif
     // Right matrix
-    roe_mat_eigenvectors[0] = half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[1] = half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[2] = -gm1 * speed_sound_squared_inverse;
+    double roe_mat_eigenvectors[25];
+    roe_mat_eigenvectors[0] = state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[1] = state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[2] = -state.gm1 * state.speed_sound_squared_inverse;
     roe_mat_eigenvectors[3] = 0.0;
     roe_mat_eigenvectors[4] = 0.0;
       
-    roe_mat_eigenvectors[5] = (uvel_roe + face_normal_unit[0] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[6] = (uvel_roe - face_normal_unit[0] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[7] = -gm1 * uvel_roe * speed_sound_squared_inverse;
-    roe_mat_eigenvectors[8] = face_tangent_unit[0];
-    roe_mat_eigenvectors[9] = face_binormal_unit[0];
+    roe_mat_eigenvectors[5] = (state.uvel_roe + state.face_normal_unit[0] * state.speed_sound_roe) * state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[6] = (state.uvel_roe - state.face_normal_unit[0] * state.speed_sound_roe) * state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[7] = -state.gm1 * state.uvel_roe * state.speed_sound_squared_inverse;
+    roe_mat_eigenvectors[8] = state.face_tangent_unit[0];
+    roe_mat_eigenvectors[9] = state.face_binormal_unit[0];
       
-    roe_mat_eigenvectors[10] = (vvel_roe + face_normal_unit[1] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[11] = (vvel_roe - face_normal_unit[1] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[12] = -gm1 * vvel_roe * speed_sound_squared_inverse;
-    roe_mat_eigenvectors[13] = face_tangent_unit[1];
-    roe_mat_eigenvectors[14] = face_binormal_unit[1];
+    roe_mat_eigenvectors[10] = (state.vvel_roe + state.face_normal_unit[1] * state.speed_sound_roe) * state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[11] = (state.vvel_roe - state.face_normal_unit[1] * state.speed_sound_roe) * state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[12] = -state.gm1 * state.vvel_roe * state.speed_sound_squared_inverse;
+    roe_mat_eigenvectors[13] = state.face_tangent_unit[1];
+    roe_mat_eigenvectors[14] = state.face_binormal_unit[1];
       
-    roe_mat_eigenvectors[15] = (wvel_roe + face_normal_unit[2] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[16] = (wvel_roe - face_normal_unit[2] * speed_sound_roe) * half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[17] = -gm1 * wvel_roe * speed_sound_squared_inverse;
-    roe_mat_eigenvectors[18] = face_tangent_unit[2];
-    roe_mat_eigenvectors[19] = face_binormal_unit[2];
+    roe_mat_eigenvectors[15] = (state.wvel_roe + state.face_normal_unit[2] * state.speed_sound_roe) * state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[16] = (state.wvel_roe - state.face_normal_unit[2] * state.speed_sound_roe) * state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[17] = -state.gm1 * state.wvel_roe * state.speed_sound_squared_inverse;
+    roe_mat_eigenvectors[18] = state.face_tangent_unit[2];
+    roe_mat_eigenvectors[19] = state.face_binormal_unit[2];
       
-    roe_mat_eigenvectors[20] = (enthalpy_roe + kinetic_energy_roe + speed_sound_roe * normal_velocity) * half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[21] = (enthalpy_roe + kinetic_energy_roe - speed_sound_roe * normal_velocity) * half_speed_sound_squared_inverse;
-    roe_mat_eigenvectors[22] = (speed_sound_roe * speed_sound_roe - gm1 * (enthalpy_roe + kinetic_energy_roe)) * speed_sound_squared_inverse;
-    roe_mat_eigenvectors[23] = tangent_velocity;
-    roe_mat_eigenvectors[24] = binormal_velocity;
+    roe_mat_eigenvectors[20] = (state.enthalpy_roe + state.kinetic_energy_roe + state.speed_sound_roe * state.normal_velocity) * state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[21] = (state.enthalpy_roe + state.kinetic_energy_roe - state.speed_sound_roe * state.normal_velocity) * state.half_speed_sound_squared_inverse;
+    roe_mat_eigenvectors[22] = (state.speed_sound_roe * state.speed_sound_roe - state.gm1 * (state.enthalpy_roe + state.kinetic_energy_roe)) * state.speed_sound_squared_inverse;
+    roe_mat_eigenvectors[23] = state.tangent_velocity;
+    roe_mat_eigenvectors[24] = state.binormal_velocity;
 
-#endif
-    MathTools<execution_space>::MatVec5(1.0, state.roe_mat_eigenvectors, state.ldq, 0.0, state.rlldq);
+
+    MathTools<execution_space>::MatVec5(1.0, roe_mat_eigenvectors, state.ldq, 0.0, state.rlldq);
 
     for (int icomp = 0; icomp < 5; ++icomp)
       flux[icomp] -= 0.5*state.rlldq[icomp];
