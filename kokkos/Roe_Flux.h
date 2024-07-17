@@ -149,7 +149,7 @@ struct roe_flux {
     const double half_speed_sound_squared_inverse = 0.5 * speed_sound_squared_inverse;
 
     // Conservative variable jumps
-    double conserved_jump[] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+    double conserved_jump[5];
     conserved_jump[0] = rho_right - rho_left;
     conserved_jump[1] = rho_right * uvel_right - rho_left * uvel_left;
     conserved_jump[2] = rho_right * vvel_right - rho_left * vvel_left;
@@ -189,9 +189,13 @@ struct roe_flux {
     eigm[3] = eigm[4] = eigm[2];
 
     // Compute upwind flux
-    double ldq[] = { 0, 0, 0, 0, 0 };
+    double ldq[5];
+    ldq[4] = 0;
+
     //double lldq[] = { 0, 0, 0, 0, 0 };
-    double rlldq[] = { 0, 0, 0, 0, 0 };
+    double rlldq[5];
+    rlldq[4] = 0;
+
       
     // Left matrix
     roe_mat_eigenvectors[0] = gm1 * (kinetic_energy_roe - enthalpy_roe) + speed_sound_roe * (speed_sound_roe - normal_velocity);
@@ -223,6 +227,15 @@ struct roe_flux {
     roe_mat_eigenvectors[22] = face_binormal_unit[1];
     roe_mat_eigenvectors[23] = face_binormal_unit[2];
     roe_mat_eigenvectors[24] = 0.0;
+
+    ldq[0] = 0;
+    rlldq[0] = 0;
+    ldq[1] = 0;
+    rlldq[1] = 0;
+    ldq[2] = 0;
+    rlldq[2] = 0;
+    ldq[3] = 0;
+    rlldq[3] = 0;
 
     MathTools<execution_space>::MatVec5(1.0, roe_mat_eigenvectors, conserved_jump, 0.0, ldq);
 
@@ -689,16 +702,9 @@ struct roe_flux {
     //double lldq[] = { 0, 0, 0, 0, 0 };
 #endif
     double ldq[5];
-    ldq[0] = 0;
-    ldq[1] = 0;
-    ldq[2] = 0;
-    ldq[3] = 0;
+
     ldq[4] = 0;
     double rlldq[5];
-    rlldq[0] = 0;
-    rlldq[1] = 0;
-    rlldq[2] = 0;
-    rlldq[3] = 0;
     rlldq[4] = 0;
     double roe_mat_eigenvectors[25];
     // Left matrix
@@ -731,6 +737,18 @@ struct roe_flux {
     roe_mat_eigenvectors[22] = state.face_binormal_unit[1];
     roe_mat_eigenvectors[23] = state.face_binormal_unit[2];
     roe_mat_eigenvectors[24] = 0.0;
+
+    // these are here and interleaved on purpose to help
+    // fight converting it to memset
+    // [4] is set above for the same reason
+    ldq[0] = 0;
+    rlldq[0] = 0;
+    ldq[1] = 0;
+    rlldq[1] = 0;
+    ldq[2] = 0;
+    rlldq[2] = 0;
+    ldq[3] = 0;
+    rlldq[3] = 0;
 
     MathTools<execution_space>::MatVec5(1.0, roe_mat_eigenvectors, state.conserved_jump, 0.0, ldq);
 
