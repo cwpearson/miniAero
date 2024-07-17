@@ -44,8 +44,10 @@ template<class Device>
 struct roe_flux {
     typedef Device execution_space;
   
-    roe_flux() {
+    int count;
+    roe_flux() : count (0) {
     }
+    roe_flux(int c) : count(c) {}
 
 
   KOKKOS_INLINE_FUNCTION
@@ -390,7 +392,11 @@ struct roe_flux {
         + wvel_roe * face_binormal_unit[2];
     const double kinetic_energy_roe = 0.5 * (uvel_roe * uvel_roe + vvel_roe * vvel_roe + wvel_roe * wvel_roe);
     const double speed_sound_squared_inverse = 1.0 / (speed_sound_roe * speed_sound_roe);
-    const double half_speed_sound_squared_inverse = 0.5 * speed_sound_squared_inverse;
+    double half_speed_sound_squared_inverse = 0.5 * speed_sound_squared_inverse;
+
+    for (int i = 0; i < count; ++i) {
+        half_speed_sound_squared_inverse *= (0.5 + i);
+    }
 
     // Conservative variable jumps
     double conserved_jump[] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -543,7 +549,7 @@ struct roe_flux {
                     const double * const& face_normal,
                     const double * const& face_tangent,
                     const double * const& face_binormal,
-                    State state) const {
+                    const State &state) const {
 
     const double gm1 = 0.4;
 #if 0
@@ -682,8 +688,18 @@ struct roe_flux {
     
     //double lldq[] = { 0, 0, 0, 0, 0 };
 #endif
-    double ldq[] = { 0, 0, 0, 0, 0 };
-    double rlldq[] = { 0, 0, 0, 0, 0 };
+    double ldq[5];
+    ldq[0] = 0;
+    ldq[1] = 0;
+    ldq[2] = 0;
+    ldq[3] = 0;
+    ldq[4] = 0;
+    double rlldq[5];
+    rlldq[0] = 0;
+    rlldq[1] = 0;
+    rlldq[2] = 0;
+    rlldq[3] = 0;
+    rlldq[4] = 0;
     double roe_mat_eigenvectors[25];
     // Left matrix
     roe_mat_eigenvectors[0] = gm1 * (state.kinetic_energy_roe - state.enthalpy_roe) + state.speed_sound_roe * (state.speed_sound_roe - state.normal_velocity);
