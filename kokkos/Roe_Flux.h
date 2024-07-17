@@ -43,8 +43,13 @@ template<class Device>
 struct roe_flux {
     typedef Device execution_space;
   
-    roe_flux() {
+    int dummy_count_; // this will aways be zero, but we use it to fake the compiler out to break up a large basic block
+
+    roe_flux() : dummy_count_(0) {
     }
+
+    // this constructor is not called, but may prevent the compiler from assuming dummy_count_ is always 0
+    roe_flux(int dummy_count) : dummy_count_(dummy_count) {}
 
   KOKKOS_INLINE_FUNCTION
   void compute_flux(const double * const& primitives_left, const double * const& primitives_right,
@@ -143,7 +148,13 @@ struct roe_flux {
         + wvel_roe * face_binormal_unit[2];
     const double kinetic_energy_roe = 0.5 * (uvel_roe * uvel_roe + vvel_roe * vvel_roe + wvel_roe * wvel_roe);
     const double speed_sound_squared_inverse = 1.0 / (speed_sound_roe * speed_sound_roe);
-    const double half_speed_sound_squared_inverse = 0.5 * speed_sound_squared_inverse;
+    double half_speed_sound_squared_inverse = 0.5 * speed_sound_squared_inverse;
+
+    // dummy_count_ is actually always 0, but hopefully the compiler doesn't know that
+    // this hopefully breaks what would otherwise be a large basic block
+    for (int i = 0; i < dummy_count_; ++i) {
+        half_speed_sound_squared_inverse *= (0.5 + i);
+    }
 
     // Conservative variable jumps
     double conserved_jump[] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -186,9 +197,19 @@ struct roe_flux {
     eigm[3] = eigm[4] = eigm[2];
 
     // Compute upwind flux
-    double ldq[] = { 0, 0, 0, 0, 0 };
+    double ldq[5];
+    ldq[0] = 0;
+    ldq[1] = 0;
+    ldq[2] = 0;
+    ldq[3] = 0;
+    ldq[4] = 0;
     //double lldq[] = { 0, 0, 0, 0, 0 };
-    double rlldq[] = { 0, 0, 0, 0, 0 };
+    double rlldq[5];
+    rlldq[0] = 0;
+    rlldq[1] = 0;
+    rlldq[2] = 0;
+    rlldq[3] = 0;
+    rlldq[4] = 0;
       
     // Left matrix
     roe_mat_eigenvectors[0] = gm1 * (kinetic_energy_roe - enthalpy_roe) + speed_sound_roe * (speed_sound_roe - normal_velocity);
