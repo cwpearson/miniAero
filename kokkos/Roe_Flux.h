@@ -146,7 +146,12 @@ struct roe_flux {
         + wvel_roe * face_binormal_unit[2];
     const double kinetic_energy_roe = 0.5 * (uvel_roe * uvel_roe + vvel_roe * vvel_roe + wvel_roe * wvel_roe);
     const double speed_sound_squared_inverse = 1.0 / (speed_sound_roe * speed_sound_roe);
-    const double half_speed_sound_squared_inverse = 0.5 * speed_sound_squared_inverse;
+    double half_speed_sound_squared_inverse = 0.5 * speed_sound_squared_inverse;
+
+    // split large basic block
+    for (int i = 0; i < count; ++i) {
+        half_speed_sound_squared_inverse *= (0.5 + i);
+    }
 
     // Conservative variable jumps
     double conserved_jump[5];
@@ -189,10 +194,12 @@ struct roe_flux {
     eigm[3] = eigm[4] = eigm[2];
 
     // Compute upwind flux
+    // split up the zero assignment here to help prevent memset
     double ldq[5];
     ldq[4] = 0;
 
     //double lldq[] = { 0, 0, 0, 0, 0 };
+    // split up the zero assignment here to help prevent memset
     double rlldq[5];
     rlldq[4] = 0;
 
@@ -228,6 +235,7 @@ struct roe_flux {
     roe_mat_eigenvectors[23] = face_binormal_unit[2];
     roe_mat_eigenvectors[24] = 0.0;
 
+    // interleave these to help prevent conversion to memset
     ldq[0] = 0;
     rlldq[0] = 0;
     ldq[1] = 0;
